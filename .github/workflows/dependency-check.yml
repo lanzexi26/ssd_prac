@@ -1,5 +1,10 @@
 name: Full CI Workflow
 
+permissions:
+  contents: read          # keep default read-only on your code
+  security-events: write  # allow writing code-scanning results
+
+
 on: [push, pull_request]
 
 jobs:
