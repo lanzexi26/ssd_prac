@@ -44,8 +44,8 @@ jobs:
       - name: Stop Nginx container
         run: docker stop test-nginx
 
+  build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -70,6 +70,7 @@ jobs:
         with:
           name: www-build
           path: www-build.tar.gz
+
 
   test:
     needs: build
