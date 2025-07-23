@@ -7,13 +7,31 @@ on:
     branches: [ main ]
 
 jobs:
-  sonarqube:
-    name: Analyze with SonarQube
+  sonar:
     runs-on: ubuntu-latest
 
+    # ─── start SonarQube inside the runner ────────────────────────
+    services:
+      sonarqube:
+        image: sonarqube:community
+        ports:
+          - 9000:9000
+        options: >-
+          --health-cmd="curl --silent --fail http://localhost:9000/api/server/version"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Wait for SonarQube to be ready
+        run: |
+          until curl --silent --fail http://localhost:9000/api/server/version; do
+            echo "⏳ waiting on SonarQube…"
+            sleep 5
+          done
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -21,10 +39,14 @@ jobs:
           node-version: 18
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: SonarQube Scan
+      - name: Run SonarQube scan
         uses: sonarsource/sonarqube-scan-action@master
+        with:
+          args: >
+            -Dsonar.projectKey=try
+            -Dsonar.sources=.
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_HOST_URL:    http://localhost:9000
+          SONARQUBE_TOKEN:   ${{ secrets.SONARQUBE_TOKEN }}
