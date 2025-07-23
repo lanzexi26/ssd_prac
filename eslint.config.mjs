@@ -25,15 +25,12 @@ export default defineConfig([
       es2021:  true,
     },
 
-    // 3) Plugins
     plugins: {
       js,
       security,
       "security-node": securityNode,
       "no-unsanitized": noUnsanitized,
     },
-
-    // 4) Extend the built-in + security rule-sets
     extends: [
       "js/recommended",
       "plugin:security/recommended",
